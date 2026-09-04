@@ -1,0 +1,70 @@
+// WIN_EMA_Crossover.ntsl
+// Estratégia de execução para o Profit / NTSL.
+// Padrão seguro: EnableOrders = False. Nessa condição, o código somente colore sinais.
+
+input
+  EnableOrders(False);
+  Contracts(1);
+  StopLossPoints(250);
+  StartHHMM(0910);
+  LastEntryHHMM(1730);
+  ForceCloseHHMM(1755);
+  FastEMAPeriod(9);
+  SlowEMAPeriod(21);
+
+var
+  FastEMA, SlowEMA : Float;
+  BuySignal, SellSignal : Boolean;
+
+begin
+  // O código deve ser aplicado ao gráfico M5 do contrato WIN vigente.
+  FastEMA := MediaExp(FastEMAPeriod, Close);
+  SlowEMA := MediaExp(SlowEMAPeriod, Close);
+
+  // Sinais baseados somente no fechamento da barra já concluída.
+  BuySignal := (FastEMA > SlowEMA) and (FastEMA[1] <= SlowEMA[1]);
+  SellSignal := (FastEMA < SlowEMA) and (FastEMA[1] >= SlowEMA[1]);
+
+  if BuySignal then
+    PaintBar(clGreen)
+  else if SellSignal then
+    PaintBar(clRed);
+
+  // Esta chave impede qualquer ordem até ser habilitada manualmente.
+  if EnableOrders then
+  begin
+    // Zera a posição antes do fim da sessão; não carrega WIN durante a noite.
+    if Time >= ForceCloseHHMM then
+    begin
+      if IsBought then
+        SellToCoverAtMarket(Contracts)
+      else if IsSold then
+        BuyToCoverAtMarket(Contracts);
+    end
+    else if IsBought then
+    begin
+      // Stop de 250 pontos a partir do preço médio de compra.
+      SellToCoverStop(BuyPrice - StopLossPoints,
+                      BuyPrice - StopLossPoints,
+                      Contracts);
+      if SellSignal then
+        SellToCoverAtMarket(Contracts);
+    end
+    else if IsSold then
+    begin
+      // Stop de 250 pontos a partir do preço médio de venda.
+      BuyToCoverStop(SellPrice + StopLossPoints,
+                     SellPrice + StopLossPoints,
+                     Contracts);
+      if BuySignal then
+        BuyToCoverAtMarket(Contracts);
+    end
+    else if (Time >= StartHHMM) and (Time < LastEntryHHMM) then
+    begin
+      if BuySignal then
+        BuyAtMarket(Contracts)
+      else if SellSignal then
+        SellShortAtMarket(Contracts);
+    end;
+  end;
+end;
