@@ -1,6 +1,6 @@
 # AutoTrade — WIN / MetaTrader 5
 
-![MQL5](https://img.shields.io/badge/MQL5-blue) ![Status](https://img.shields.io/badge/status-prot%C3%B3tipo-yellow) ![Privado](https://img.shields.io/badge/-privado-grey) ![Live Trading](https://img.shields.io/badge/live%20trading-disabled-critical)
+![MQL5](https://img.shields.io/badge/MQL5-blue) ![Status](https://img.shields.io/badge/status-prototype-yellow) ![Live Trading](https://img.shields.io/badge/live%20trading-disabled-critical)
 
 `WIN_MA_Crossover.mq5` is a starting Expert Advisor (EA) for the active B3 mini-index contract on MetaTrader 5.
 
